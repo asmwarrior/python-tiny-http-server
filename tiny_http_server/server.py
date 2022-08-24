@@ -30,6 +30,8 @@ import socket
 # https://parsiya.net/blog/2020-11-15-customizing-pythons-simplehttpserver/
 from urllib.parse import urlparse
 
+# try to save/copy file to another place
+import shutil
 DEFAULT_EXTENSIONS_UPDATES = {
     ".md": "text/plain",
 }
@@ -253,6 +255,14 @@ class AuthHTTPRequestHandler(MySimpleHTTPRequestHandler):
                     return
                 print("path={:s}".format(path))
                 SimpleHTTPRequestHandler.do_GET(self)
+
+                filepath = self.translate_path(self.path)
+                if os.path.isfile(filepath):
+                    # copy file to another path
+                    head, tail = os.path.split(filepath)
+                    target = os.path.join(head, "save", tail)
+                    shutil.copyfile(filepath, target)
+
             else:
                 self.logger.debug("do_GET: WRONG Basic auth")
                 self.do_AUTHHEAD()
