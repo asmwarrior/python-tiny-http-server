@@ -27,6 +27,9 @@ import socketserver
 import contextlib
 import socket
 
+# https://parsiya.net/blog/2020-11-15-customizing-pythons-simplehttpserver/
+from urllib.parse import urlparse
+
 DEFAULT_EXTENSIONS_UPDATES = {
     ".md": "text/plain",
 }
@@ -233,6 +236,22 @@ class AuthHTTPRequestHandler(MySimpleHTTPRequestHandler):
             if self.users.get(user) == passwd:
                 self.logger.debug("do_GET: correct Basic auth")
                 self.logger.debug(f"Request path: {self.path}")
+                print('user={:s}'.format(user))
+                # first we need to parse it
+                parsed = urlparse(self.path)
+                # get the query string
+                query_string = parsed.query
+                # get the request path, this new path does not have the query string
+                path = parsed.path
+                # escape the ico, see:
+                # https://stackoverflow.com/questions/65524882/python-and-basehttprequesthandler-add-an-empty-favicon-in-the-header-of-the-ge/66865531#comment129743768_66865531
+                if self.path == '/favicon.ico':
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'image/x-icon')
+                    self.send_header('Content-Length', 0)
+                    self.end_headers()
+                    return
+                print("path={:s}".format(path))
                 SimpleHTTPRequestHandler.do_GET(self)
             else:
                 self.logger.debug("do_GET: WRONG Basic auth")
