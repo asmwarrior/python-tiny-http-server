@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-# Simple ad-hoc http server for serving static pages in a directory, optionally 
+# Simple ad-hoc http server for serving static pages in a directory, optionally
 # using basic auth for authentication.
-# 
+#
 # Basic Auth is enabled if one or both of the --authfile or --auth options are provided.
 
 # Create self-signed certificate for testing on localhost: see https://letsencrypt.org/docs/certificates-for-localhost/
