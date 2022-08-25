@@ -262,6 +262,7 @@ class AuthHTTPRequestHandler(MySimpleHTTPRequestHandler):
                     head, tail = os.path.split(filepath)
                     target = os.path.join(head, "save", tail)
                     shutil.copyfile(filepath, target)
+                    print("copy file", filepath)
 
             else:
                 self.logger.debug("do_GET: WRONG Basic auth")
