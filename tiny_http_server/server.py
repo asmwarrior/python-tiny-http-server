@@ -30,6 +30,8 @@ import socket
 # https://parsiya.net/blog/2020-11-15-customizing-pythons-simplehttpserver/
 from urllib.parse import urlparse
 
+import datetime
+
 # try to save/copy file to another place
 import shutil
 DEFAULT_EXTENSIONS_UPDATES = {
@@ -260,7 +262,16 @@ class AuthHTTPRequestHandler(MySimpleHTTPRequestHandler):
                 if os.path.isfile(filepath):
                     # copy file to another path
                     head, tail = os.path.split(filepath)
-                    target = os.path.join(head, "save", tail)
+                    # saved path
+                    saved_path = os.path.join(head, "save")
+                    # Check whether the specified path exists or not
+                    isExist = os.path.exists(saved_path)
+                    if not isExist:
+                        os.makedirs(saved_path)
+                    # put hte user name as the prefix
+                    # time string
+                    time_str = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                    target = os.path.join(saved_path, user + "-" + time_str + "-" + tail)
                     shutil.copyfile(filepath, target)
                     print("copy file", filepath)
 
