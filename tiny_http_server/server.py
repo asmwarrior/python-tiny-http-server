@@ -258,12 +258,16 @@ class AuthHTTPRequestHandler(MySimpleHTTPRequestHandler):
                 print("path={:s}".format(path))
                 SimpleHTTPRequestHandler.do_GET(self)
 
-                filepath = self.translate_path(self.path)
-                if os.path.isfile(filepath):
+                # the full path of the original(source) file
+                source_filepath = self.translate_path(self.path)
+                if os.path.isfile(source_filepath):
                     # copy file to another path
-                    head, tail = os.path.split(filepath)
+                    # head, tail = os.path.split(self.path)
                     # saved path
-                    saved_path = os.path.join(head, "save")
+                    saved_path = os.path.join(self.directory, "save")
+                    # a = os.path.join("f:\\code", "/a.py") --> result a = f:/2to3.py, this is not quite correct
+                    #saved_file = os.path.join(saved_path, self.path)
+                    head, tail = os.path.split(source_filepath)
                     # Check whether the specified path exists or not
                     isExist = os.path.exists(saved_path)
                     if not isExist:
@@ -272,8 +276,9 @@ class AuthHTTPRequestHandler(MySimpleHTTPRequestHandler):
                     # time string
                     time_str = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
                     target = os.path.join(saved_path, user + "-" + time_str + "-" + tail)
-                    shutil.copyfile(filepath, target)
-                    print("copy file", filepath)
+                    shutil.copyfile(source_filepath, target)
+                    print("copy file", source_filepath)
+                    print("to file", target)
 
             else:
                 self.logger.debug("do_GET: WRONG Basic auth")
