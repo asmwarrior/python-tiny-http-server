@@ -265,7 +265,7 @@ class AuthHTTPRequestHandler(MySimpleHTTPRequestHandler):
                     # head, tail = os.path.split(self.path)
                     # saved path
                     saved_path = os.path.join(self.directory, "save")
-                    # a = os.path.join("f:\\code", "/a.py") --> result a = f:/2to3.py, this is not quite correct
+                    # a = os.path.join("f:\\code", "/a.py") --> result a = f:/a.py, this is not quite correct
                     #saved_file = os.path.join(saved_path, self.path)
                     head, tail = os.path.split(source_filepath)
                     # Check whether the specified path exists or not
