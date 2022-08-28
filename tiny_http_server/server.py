@@ -52,7 +52,7 @@ document.getElementsByTagName('form')[0].addEventListener('submit', e => {
   const filenames = formData.getAll('files').map(v => v.name).join(', ')
   const request = new XMLHttpRequest()
   request.open(e.target.method, e.target.action)
-  request.timeout = 3600000  
+  request.timeout = 3600000
   request.onreadystatechange = () => {
     if(request.readyState === XMLHttpRequest.DONE) {
       let message = `${request.status}: ${request.statusText}`
