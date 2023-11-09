@@ -171,7 +171,7 @@ class MySimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
                     # copy file to another path
                     # head, tail = os.path.split(self.path)
                     # saved path
-                    saved_path = os.path.join(self.directory, "record-upload")
+                    saved_path = os.path.join(self.directory, "record-upload/" + user)
                     # a = os.path.join("f:\\code", "/a.py") --> result a = f:/a.py, this is not quite correct
                     #saved_file = os.path.join(saved_path, self.path)
                     head, tail = os.path.split(source_filepath)
@@ -182,7 +182,7 @@ class MySimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
                     # put the user name as the prefix
                     # time string
                     time_str = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-                    target = os.path.join(saved_path, user + "-" + time_str + "-" + tail)
+                    target = os.path.join(saved_path, time_str + "-" + tail)
                     shutil.copyfile(source_filepath, target)
                     print("copy file", source_filepath)
                     print("to file", target)
@@ -287,7 +287,7 @@ class AuthHTTPRequestHandler(MySimpleHTTPRequestHandler):
                     # copy file to another path
                     # head, tail = os.path.split(self.path)
                     # saved path
-                    saved_path = os.path.join(self.directory, "record-download")
+                    saved_path = os.path.join(self.directory, "record-download/" + user)
                     # a = os.path.join("f:\\code", "/a.py") --> result a = f:/a.py, this is not quite correct
                     #saved_file = os.path.join(saved_path, self.path)
                     head, tail = os.path.split(source_filepath)
@@ -298,7 +298,7 @@ class AuthHTTPRequestHandler(MySimpleHTTPRequestHandler):
                     # put the user name as the prefix
                     # time string
                     time_str = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-                    target = os.path.join(saved_path, user + "-" + time_str + "-" + tail)
+                    target = os.path.join(saved_path, time_str + "-" + tail)
                     shutil.copyfile(source_filepath, target)
                     print("copy file", source_filepath)
                     print("to file", target)
