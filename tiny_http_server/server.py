@@ -272,7 +272,7 @@ class AuthHTTPRequestHandler(MySimpleHTTPRequestHandler):
                     isExist = os.path.exists(saved_path)
                     if not isExist:
                         os.makedirs(saved_path)
-                    # put hte user name as the prefix
+                    # put the user name as the prefix
                     # time string
                     time_str = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
                     target = os.path.join(saved_path, user + "-" + time_str + "-" + tail)
