@@ -141,7 +141,7 @@ class MySimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         return f
 
-    def receive_upload(self, path):
+    def receive_upload(self, path, user):
         # NOTE: this code has been copied/adapted from https://github.com/Densaugeo/uploadserver
         self.logger.debug(f"Receiving file(s)")
         result = (HTTPStatus.INTERNAL_SERVER_ERROR, 'Server error')
@@ -164,6 +164,29 @@ class MySimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
                     f.write(field.file.read())
                     self.logger.info(f'Upload of "{filename}" to {tofile}')
                     result = (HTTPStatus.NO_CONTENT, None)
+
+                # the full path of the original(source) file
+                source_filepath = tofile #self.translate_path(self.path)
+                if os.path.isfile(source_filepath):
+                    # copy file to another path
+                    # head, tail = os.path.split(self.path)
+                    # saved path
+                    saved_path = os.path.join(self.directory, "record-upload")
+                    # a = os.path.join("f:\\code", "/a.py") --> result a = f:/a.py, this is not quite correct
+                    #saved_file = os.path.join(saved_path, self.path)
+                    head, tail = os.path.split(source_filepath)
+                    # Check whether the specified path exists or not
+                    isExist = os.path.exists(saved_path)
+                    if not isExist:
+                        os.makedirs(saved_path)
+                    # put the user name as the prefix
+                    # time string
+                    time_str = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                    target = os.path.join(saved_path, user + "-" + time_str + "-" + tail)
+                    shutil.copyfile(source_filepath, target)
+                    print("copy file", source_filepath)
+                    print("to file", target)
+
         return result
 
     def do_GET(self):
@@ -174,7 +197,7 @@ class MySimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
         self.logger.info(f"Requested file {path} for {self.path}")
         super().do_GET()
 
-    def do_POST(self):
+    def do_POST(self, user):
         # NOTE: this code has been copied/adapted from https://github.com/Densaugeo/uploadserver
         self.logger.debug("do_POST: got POST request")
         if not self.enable_upload:
@@ -187,7 +210,7 @@ class MySimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
             self.send_error(HTTPStatus.NOT_FOUND, 'Upload/POST not allowed: not a directory')
             self.logger.info(f"Rejecting upload: {path} not a directory")
             return
-        result = self.receive_upload(path)
+        result = self.receive_upload(path, user)
         if result[0] < HTTPStatus.BAD_REQUEST:
             self.send_response(result[0], result[1])
             self.end_headers()
@@ -264,7 +287,7 @@ class AuthHTTPRequestHandler(MySimpleHTTPRequestHandler):
                     # copy file to another path
                     # head, tail = os.path.split(self.path)
                     # saved path
-                    saved_path = os.path.join(self.directory, "save")
+                    saved_path = os.path.join(self.directory, "record-download")
                     # a = os.path.join("f:\\code", "/a.py") --> result a = f:/a.py, this is not quite correct
                     #saved_file = os.path.join(saved_path, self.path)
                     head, tail = os.path.split(source_filepath)
@@ -287,6 +310,40 @@ class AuthHTTPRequestHandler(MySimpleHTTPRequestHandler):
             self.logger.debug("do_GET: other stuff, this should never happen")
             raise Exception("This should not happen ...")
 
+
+    def do_POST(self):
+        """ Present frontpage with user authentication. """
+        ahdr = self.headers.get("Authorization")
+        self.logger.debug(f"do_POST: first={self.global_var}, ahdr={ahdr},\nheaders={self.headers}")
+        if self.global_var["first"] or self.headers.get("Authorization") == None:
+            if self.global_var["first"]:
+                self.global_var["first"] = False
+                self.logger.debug(f"First time, setting to false")
+            else:
+                self.logger.debug("do_POST: no authorization")
+            self.do_AUTHHEAD()
+            self.logger.debug("After do_AUTHHEAD")
+        elif self.headers.get("Authorization") is not None:
+            auth = self.headers.get("Authorization")
+            self.logger.debug(f"Got auth header: >>{auth}<<")
+            if not auth.startswith("Basic "):
+                self.do_AUTHHEAD()
+                return
+            auth = auth[6:]
+            user, passwd = base64.b64decode(auth).decode("UTF-8").split(":")
+            if self.users.get(user) == passwd:
+                self.logger.debug("do_POST: correct Basic auth")
+                self.logger.debug(f"Request path: {self.path}")
+                print('user={:s}'.format(user))
+
+                MySimpleHTTPRequestHandler.do_POST(self, user)
+
+            else:
+                self.logger.debug("do_GET: WRONG Basic auth")
+                self.do_AUTHHEAD()
+        else:
+            self.logger.debug("do_GET: other stuff, this should never happen")
+            raise Exception("This should not happen ...")
 
 def main():
     import argparse
